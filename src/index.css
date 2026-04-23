@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Tüm uygulamada geçerli olacak temel ayarlar (isteğe bağlı) */
+body {
+  @apply bg-gray-50 text-gray-800 font-sans;
+}
