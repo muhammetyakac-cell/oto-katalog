@@ -88,20 +88,35 @@ export default function Editor() {
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setLogoUrl(reader.result);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    resizeAndEncodeImage(file, { maxWidth: 500, maxHeight: 220, quality: 0.8 }).then(setLogoUrl);
   };
 
   const handleCoverUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setCoverImageUrl(reader.result);
-    reader.readAsDataURL(file);
+    resizeAndEncodeImage(file, { maxWidth: 1240, maxHeight: 1754, quality: 0.78 }).then(setCoverImageUrl);
   };
+
+  const resizeAndEncodeImage = (file, { maxWidth, maxHeight, quality = 0.82 }) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {

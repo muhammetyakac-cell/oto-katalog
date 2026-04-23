@@ -357,10 +357,12 @@ export const CatalogPDF = ({
 
       {pages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
-          <View style={styles.header}>
-            {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
-            <Text style={styles.catalogTitle}>{projectName}</Text>
-          </View>
+          {pageIndex === 0 ? (
+            <View style={styles.header}>
+              {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
+              <Text style={styles.catalogTitle}>{projectName}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.gridContainer}>
             {pageGroup.map((product, index) => (
