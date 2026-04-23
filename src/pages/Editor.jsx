@@ -4,11 +4,11 @@ import * as XLSX from 'xlsx';
 import { 
   UploadCloud, Settings2, CheckCircle2, Save, 
   RefreshCw, Download, ArrowLeft, Image as ImageIcon,
-  Edit2, ArrowLeftRight, Trash2, PlusCircle, X
+  Edit2, ArrowLeftRight, Trash2, PlusCircle, X, Palette
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { CatalogPDF } from '../components/CatalogPDF';
+import { CatalogPDF, THEME_PRESETS } from '../components/CatalogPDF';
 
 export default function Editor() {
   const [searchParams] = useSearchParams();
@@ -28,6 +28,12 @@ export default function Editor() {
   const [isSaving, setIsSaving] = useState(false);
   const [pdfReady, setPdfReady] = useState(false);
   const [loading, setLoading] = useState(!!projectId);
+  const [themeKey, setThemeKey] = useState('emeraldNavy');
+  const [includeCoverPage, setIncludeCoverPage] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [coverTitle, setCoverTitle] = useState('2026 Yedek Parça Kataloğu');
+  const [includeBackCoverPage, setIncludeBackCoverPage] = useState(false);
+  const [backCoverContact, setBackCoverContact] = useState({ address: '', phone: '', website: '' });
 
   const [editingImageId, setEditingImageId] = useState(null);
   const [tempImageUrl, setTempImageUrl] = useState('');
@@ -66,7 +72,7 @@ export default function Editor() {
 
   useEffect(() => {
     setPdfReady(false);
-  }, [products, projectName, logoUrl]);
+  }, [products, projectName, logoUrl, themeKey, includeCoverPage, coverImageUrl, coverTitle, includeBackCoverPage, backCoverContact]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -82,12 +88,35 @@ export default function Editor() {
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setLogoUrl(reader.result);
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    resizeAndEncodeImage(file, { maxWidth: 500, maxHeight: 220, quality: 0.8 }).then(setLogoUrl);
   };
+
+  const handleCoverUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    resizeAndEncodeImage(file, { maxWidth: 1240, maxHeight: 1754, quality: 0.78 }).then(setCoverImageUrl);
+  };
+
+  const resizeAndEncodeImage = (file, { maxWidth, maxHeight, quality = 0.82 }) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {
@@ -283,7 +312,16 @@ export default function Editor() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <div className="flex flex-wrap items-start gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><Palette className="w-3 h-3" /> Tema</label>
+                  <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-52 bg-white border border-gray-200 rounded-lg px-2 py-2 text-sm font-bold outline-none">
+                    {Object.entries(THEME_PRESETS).map(([key, palette]) => (
+                      <option key={key} value={key}>{palette.name}</option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase">Toplu Fiyat (%)</label>
                   <div className="flex gap-2">
@@ -320,6 +358,40 @@ export default function Editor() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-black text-gray-700">Özel Kapak (Opsiyonel)</h4>
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
+                    <input type="checkbox" checked={includeCoverPage} onChange={(e) => setIncludeCoverPage(e.target.checked)} className="accent-blue-600" />
+                    Aktif
+                  </label>
+                </div>
+                <input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kapak Başlığı" />
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold text-blue-600 cursor-pointer hover:bg-blue-50 transition-all shadow-sm">
+                    <UploadCloud className="w-3 h-3" /> Kapak Görseli Yükle
+                    <input type="file" className="hidden" onChange={handleCoverUpload} accept="image/*" />
+                  </label>
+                  {coverImageUrl && <button onClick={() => setCoverImageUrl('')} className="text-[11px] text-red-500 font-bold hover:underline">KALDIR</button>}
+                </div>
+                <p className="text-[11px] text-gray-500">Tam sayfa görsel önerilir (A4 dikey oran).</p>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-black text-gray-700">Arka Kapak / İletişim (Opsiyonel)</h4>
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
+                    <input type="checkbox" checked={includeBackCoverPage} onChange={(e) => setIncludeBackCoverPage(e.target.checked)} className="accent-blue-600" />
+                    Aktif
+                  </label>
+                </div>
+                <input type="text" value={backCoverContact.address} onChange={(e) => setBackCoverContact(prev => ({ ...prev, address: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Adres" />
+                <input type="text" value={backCoverContact.phone} onChange={(e) => setBackCoverContact(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Telefon" />
+                <input type="text" value={backCoverContact.website} onChange={(e) => setBackCoverContact(prev => ({ ...prev, website: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Web Sitesi" />
+              </div>
+            </div>
+
             <div className="flex gap-4 justify-end items-center pt-6 border-t border-gray-100">
               <button onClick={saveToDatabase} disabled={isSaving} className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
                 <Save className="w-5 h-5" /> {isSaving ? 'Kaydediliyor...' : 'Taslağı Kaydet'}
@@ -331,7 +403,19 @@ export default function Editor() {
                 </button>
               ) : (
                 <PDFDownloadLink 
-                  document={<CatalogPDF products={products} projectName={projectName} logoUrl={logoUrl} />} 
+                  document={(
+                    <CatalogPDF
+                      products={products}
+                      projectName={projectName}
+                      logoUrl={logoUrl}
+                      themeKey={themeKey}
+                      includeCoverPage={includeCoverPage}
+                      coverImageUrl={coverImageUrl}
+                      coverTitle={coverTitle}
+                      includeBackCoverPage={includeBackCoverPage}
+                      backCoverContact={backCoverContact}
+                    />
+                  )}
                   fileName={`${projectName.toLowerCase().replace(/\s+/g, '-')}.pdf`}
                   className="flex items-center gap-2 bg-blue-600 text-white px-10 py-4 rounded-2xl font-black shadow-2xl animate-bounce"
                 >
