@@ -12,83 +12,84 @@ Font.register({
 });
 
 const styles = StyleSheet.create({
-  page: { 
-    paddingTop: 30, 
-    paddingBottom: 20, 
-    paddingHorizontal: 35,
-    backgroundColor: '#ffffff', 
-    fontFamily: 'Roboto' 
+  page: {
+    paddingTop: 20,
+    paddingBottom: 16,
+    paddingHorizontal: 30,
+    backgroundColor: '#ffffff',
+    fontFamily: 'Roboto'
   },
-  
-  header: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: 20, 
+
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
     borderBottomWidth: 2,
     borderBottomColor: '#f3f4f6',
     borderBottomStyle: 'solid',
-    paddingBottom: 10,
-    height: 70 
+    paddingBottom: 8,
+    height: 58
   },
-  logo: { width: 100, height: 50, objectFit: 'contain' },
-  logoPlaceholder: { width: 100, height: 50 },
+  logo: { width: 96, height: 44, objectFit: 'contain' },
+  logoPlaceholder: { width: 96, height: 44 },
   catalogTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827', textTransform: 'uppercase' },
-  
-  gridContainer: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
+
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between'
   },
-  
-  // KUTUCUK YÜKSEKLİĞİ: 215pt olarak güncellendi. (3 satır x 215 = 645pt. Header ve boşluklarla A4'e tam sığar)
+
+  // Kartlar özellikle dikey olarak genişletildi ve sabit alanlara bölündü.
   productCard: {
-    width: '49%', 
-    height: 215, 
-    marginBottom: 12, 
-    padding: 8,
+    width: '49%',
+    height: 222,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: '#e2e8f0', 
+    borderColor: '#e2e8f0',
     borderStyle: 'solid',
     borderRadius: 10,
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#ffffff'
   },
-  
+
   imageContainer: {
-    height: 75, // Resim alanı metinlere yer açmak için optimize edildi
+    height: 76,
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4 
+    marginBottom: 4
   },
   image: { width: 75, height: 75, objectFit: 'contain' },
-  
-  contentBox: { 
-    width: '100%', 
+
+  contentBox: {
+    width: '100%',
     alignItems: 'center',
     flex: 1
   },
-  
-  title: { 
-    fontSize: 9.5, 
-    fontWeight: 'bold', 
-    textAlign: 'center', 
-    color: '#1e3a8a', 
-    marginBottom: 1,
-    height: 22, // 2 satıra kadar izin verir
-    lineHeight: 1.1
+
+  title: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#1e3a8a',
+    marginBottom: 2,
+    minHeight: 24,
+    lineHeight: 1.15
   },
-  
-  code: { 
-    fontSize: 7.5, 
-    color: '#64748b', 
-    marginBottom: 3, 
-    fontStyle: 'italic' 
+
+  code: {
+    fontSize: 7.5,
+    color: '#64748b',
+    marginBottom: 4,
+    fontStyle: 'italic'
   },
-  
+
   categoryBadge: {
     backgroundColor: '#e0f2fe',
     color: '#0284c7',
@@ -98,127 +99,127 @@ const styles = StyleSheet.create({
     fontSize: 6.5,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 4
+    marginBottom: 5
   },
 
-  // ÖZEL ALANLAR: Üst üste binmeyi engellemek için dikey liste yapısı
   customFieldsContainer: {
     width: '100%',
     alignItems: 'center',
-    height: 45, // 3 sütun için sabit dikey alan ayrıldı
-    justifyContent: 'center',
+    minHeight: 56,
+    justifyContent: 'flex-start',
     overflow: 'hidden'
   },
   customFieldRow: {
     width: '100%',
-    marginBottom: 1
+    minHeight: 17,
+    marginBottom: 1,
+    justifyContent: 'center'
   },
   customFieldText: {
     fontSize: 7,
     color: '#475569',
     textAlign: 'center',
-    lineHeight: 1.1
+    lineHeight: 1.2
   },
   customFieldLabel: {
     fontWeight: 'bold',
     color: '#0f172a'
   },
-  
-  priceContainer: { 
-    backgroundColor: '#10b981', 
+
+  priceContainer: {
+    backgroundColor: '#10b981',
     paddingVertical: 4,
-    paddingHorizontal: 15, 
-    borderRadius: 6, 
+    paddingHorizontal: 15,
+    borderRadius: 6,
     alignItems: 'center',
-    marginTop: 'auto', // En dibe yaslanır
-    width: '80%'
+    marginTop: 'auto',
+    width: '82%'
   },
-  price: { 
-    fontSize: 11, 
-    fontWeight: 'bold', 
-    color: '#ffffff' 
+  price: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#ffffff'
   },
-  
+
   pageNumber: {
     position: 'absolute',
     fontSize: 8,
-    bottom: 10,
+    bottom: 8,
     left: 0,
     right: 0,
     textAlign: 'center',
-    color: '#9ca3af',
-  },
+    color: '#9ca3af'
+  }
 });
 
-const ProductCard = ({ product }) => (
-  <View style={styles.productCard} wrap={false}>
-    <View style={styles.imageContainer}>
-      {product.resimUrl && (
-        <Image src={product.resimUrl} style={styles.image} />
-      )}
-    </View>
-    <View style={styles.contentBox}>
-      <Text style={styles.title} maxLines={2}>
-        {product.urunAdi}
-      </Text>
-      
-      <Text style={styles.code}>{product.stokKodu}</Text>
-      
-      {product.kategori ? (
-        <Text style={styles.categoryBadge}>{product.kategori}</Text>
-      ) : null}
+const truncate = (value, maxLength = 64) => {
+  if (value === null || value === undefined) return '';
+  const text = String(value).replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+};
 
-      <View style={styles.customFieldsContainer}>
-        {product.ekstraOzellikler && Object.entries(product.ekstraOzellikler).map(([key, val], idx) => (
-          val ? (
-            <View key={idx} style={styles.customFieldRow}>
-              <Text style={styles.customFieldText} maxLines={1}>
-                <Text style={styles.customFieldLabel}>{key}: </Text>
-                {val}
+const ProductCard = ({ product }) => {
+  const visibleFields = Object.entries(product.ekstraOzellikler || {})
+    .filter(([, val]) => String(val || '').trim())
+    .slice(0, 3);
+
+  return (
+    <View style={styles.productCard} wrap={false}>
+      <View style={styles.imageContainer}>
+        {product.resimUrl ? (
+          <Image src={product.resimUrl} style={styles.image} />
+        ) : null}
+      </View>
+
+      <View style={styles.contentBox}>
+        <Text style={styles.title}>{truncate(product.urunAdi, 70)}</Text>
+        <Text style={styles.code}>{truncate(product.stokKodu, 26)}</Text>
+
+        {product.kategori ? (
+          <Text style={styles.categoryBadge}>{truncate(product.kategori, 26)}</Text>
+        ) : null}
+
+        <View style={styles.customFieldsContainer}>
+          {visibleFields.map(([key, val], idx) => (
+            <View key={`${key}-${idx}`} style={styles.customFieldRow}>
+              <Text style={styles.customFieldText}>
+                <Text style={styles.customFieldLabel}>{truncate(key, 14)}: </Text>
+                {truncate(val, 72)}
               </Text>
             </View>
-          ) : null
-        ))}
-      </View>
+          ))}
+        </View>
 
-      <View style={styles.priceContainer}>
-        <Text style={styles.price}>{product.fiyat} TL</Text>
+        <View style={styles.priceContainer}>
+          <Text style={styles.price}>{product.fiyat} TL</Text>
+        </View>
       </View>
     </View>
-  </View>
-);
+  );
+};
 
 export const CatalogPDF = ({ products, projectName, logoUrl }) => {
-  // Matematiksel Chunking
-  const firstPageProducts = products.slice(0, 4);
-  const remainingProducts = products.slice(4);
-  const otherPages = [];
-  
-  for (let i = 0; i < remainingProducts.length; i += 6) {
-    otherPages.push(remainingProducts.slice(i, i + 6));
+  // Tüm sayfalarda 6 ürün (2x3) kullanılır: sabit ritim, daha az alt boşluk.
+  const pages = [];
+  for (let i = 0; i < products.length; i += 6) {
+    pages.push(products.slice(i, i + 6));
   }
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
-          <Text style={styles.catalogTitle}>{projectName}</Text>
-        </View>
-
-        <View style={styles.gridContainer}>
-          {firstPageProducts.map((product, index) => (
-            <ProductCard key={product.id || index} product={product} />
-          ))}
-        </View>
-        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
-      </Page>
-
-      {otherPages.map((pageGroup, pageIndex) => (
+      {pages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
+          {pageIndex === 0 ? (
+            <View style={styles.header}>
+              {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
+              <Text style={styles.catalogTitle}>{projectName}</Text>
+            </View>
+          ) : null}
+
           <View style={styles.gridContainer}>
             {pageGroup.map((product, index) => (
-              <ProductCard key={product.id || index} product={product} />
+              <ProductCard key={product.id || `${pageIndex}-${index}`} product={product} />
             ))}
           </View>
           <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
