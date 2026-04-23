@@ -14,7 +14,6 @@ const styles = StyleSheet.create({
     height: 80 
   },
   logo: { width: 110, height: 60, objectFit: 'contain' },
-  // Logo yoksa sağdaki başlığın düzenini korumak için görünmez kutu
   logoPlaceholder: { width: 110, height: 60 },
   catalogTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', textTransform: 'uppercase' },
   
@@ -28,34 +27,41 @@ const styles = StyleSheet.create({
     width: '48%', 
     height: 230, 
     marginBottom: 20,
-    padding: 12,
+    padding: 10, // Kart içi boşluğu biraz kıstık ki alana yer açılsın
     border: '1pt solid #f3f4f6',
     borderRadius: 8,
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-between' 
+    alignItems: 'center'
+    // justifyContent: 'space-between' kaldırıldı, flex yapısına geçildi
   },
   
   imageContainer: {
-    height: 90, // Ekstra alanlara yer açmak için azıcık daha kıstık
+    height: 85, // Resmi hafif küçülttük
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4
+    marginBottom: 2 // Resim ile isim arasındaki boşluk minimuma indi
   },
-  image: { width: 90, height: 90, objectFit: 'contain' },
+  image: { width: 85, height: 85, objectFit: 'contain' },
   
-  contentBox: { width: '100%', alignItems: 'center' },
+  // İçerik kutusuna flex: 1 verdik, böylece kalan tüm alanı dolduracak
+  contentBox: { 
+    width: '100%', 
+    alignItems: 'center',
+    flex: 1 
+  },
+  
   title: { 
-    fontSize: 11, 
+    fontSize: 10, // 11'den 10'a çekildi
     fontWeight: 'bold', 
     textAlign: 'center', 
     color: '#1f2937', 
     marginBottom: 2,
-    height: 26 
+    height: 24, // Sadece 2 satıra izin veriyor, taşmayı engeller
+    lineHeight: 1.2
   },
-  code: { fontSize: 8, color: '#6b7280', marginBottom: 4, fontStyle: 'italic' },
+  code: { fontSize: 8, color: '#6b7280', marginBottom: 3, fontStyle: 'italic' },
   
   categoryBadge: {
     backgroundColor: '#eff6ff',
@@ -65,17 +71,16 @@ const styles = StyleSheet.create({
     fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 4
+    marginBottom: 3
   },
 
-  // YENİ: Ekstra Özel Alan Kutucukları
   customFieldsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 4,
-    marginBottom: 6,
-    height: 12 // Sabit yükseklik, taşmayı önler
+    gap: 3,
+    marginBottom: 4,
+    height: 12 
   },
   customFieldBadge: {
     backgroundColor: '#f3f4f6',
@@ -87,14 +92,16 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
   
+  // En önemli dokunuş: marginTop: 'auto'. Bu sayede fiyat kutusu HER ZAMAN en dibe yapışır, üstteki metinlerle asla çarpışmaz.
   priceContainer: { 
     backgroundColor: '#f9fafb', 
-    padding: '6 16', 
+    padding: '5 12', 
     borderRadius: 4, 
     width: '100%',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginTop: 'auto' 
   },
-  price: { fontSize: 13, fontWeight: 'heavy', color: '#111827' },
+  price: { fontSize: 12, fontWeight: 'heavy', color: '#111827' },
   
   pageNumber: {
     position: 'absolute',
@@ -124,7 +131,6 @@ const ProductCard = ({ product }) => (
         <View style={{ height: 12 }} /> 
       )}
 
-      {/* YENİ: EKSTRA ALANLARIN BASILMASI */}
       <View style={styles.customFieldsContainer}>
         {product.ekstraOzellikler && Object.entries(product.ekstraOzellikler).map(([key, val], idx) => (
           val ? <Text key={idx} style={styles.customFieldBadge}>{key}: {val}</Text> : null
