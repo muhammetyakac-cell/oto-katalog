@@ -1,8 +1,19 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+
+// Türkçe karakterleri sorunsuz basabilmek için Google Fonts'tan Roboto'yu yüklüyoruz
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf' }, // Normal
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf', fontWeight: 'bold' }, // Kalın
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOkCnqEu92Fr1Mu51xIIzc3WEBvhQ.ttf', fontStyle: 'italic' } // İtalik
+  ]
+});
 
 const styles = StyleSheet.create({
-  page: { padding: 40, backgroundColor: '#ffffff' },
+  // Font ailesini sayfanın tamamına uyguluyoruz
+  page: { padding: 40, backgroundColor: '#ffffff', fontFamily: 'Roboto' },
   
   header: { 
     flexDirection: 'row', 
@@ -25,27 +36,25 @@ const styles = StyleSheet.create({
   
   productCard: {
     width: '48%', 
-    height: 230, 
+    height: 195, // 230'dan 195'e düşürüldü. Gereksiz devasa boşluk kapatıldı.
     marginBottom: 20,
-    padding: 10, // Kart içi boşluğu biraz kıstık ki alana yer açılsın
+    padding: 10,
     border: '1pt solid #f3f4f6',
     borderRadius: 8,
     flexDirection: 'column',
     alignItems: 'center'
-    // justifyContent: 'space-between' kaldırıldı, flex yapısına geçildi
   },
   
   imageContainer: {
-    height: 85, // Resmi hafif küçülttük
+    height: 85, 
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 2 // Resim ile isim arasındaki boşluk minimuma indi
+    marginBottom: 4 
   },
   image: { width: 85, height: 85, objectFit: 'contain' },
   
-  // İçerik kutusuna flex: 1 verdik, böylece kalan tüm alanı dolduracak
   contentBox: { 
     width: '100%', 
     alignItems: 'center',
@@ -53,15 +62,15 @@ const styles = StyleSheet.create({
   },
   
   title: { 
-    fontSize: 10, // 11'den 10'a çekildi
+    fontSize: 10, 
     fontWeight: 'bold', 
     textAlign: 'center', 
     color: '#1f2937', 
     marginBottom: 2,
-    height: 24, // Sadece 2 satıra izin veriyor, taşmayı engeller
+    height: 24, 
     lineHeight: 1.2
   },
-  code: { fontSize: 8, color: '#6b7280', marginBottom: 3, fontStyle: 'italic' },
+  code: { fontSize: 8, color: '#6b7280', marginBottom: 4, fontStyle: 'italic' },
   
   categoryBadge: {
     backgroundColor: '#eff6ff',
@@ -71,7 +80,7 @@ const styles = StyleSheet.create({
     fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 3
+    marginBottom: 4
   },
 
   customFieldsContainer: {
@@ -79,8 +88,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 3,
-    marginBottom: 4,
-    height: 12 
+    marginBottom: 4
+    // Sabit height kaldırıldı. Eğer özellik yoksa yer kaplamayacak.
   },
   customFieldBadge: {
     backgroundColor: '#f3f4f6',
@@ -92,16 +101,15 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
   
-  // En önemli dokunuş: marginTop: 'auto'. Bu sayede fiyat kutusu HER ZAMAN en dibe yapışır, üstteki metinlerle asla çarpışmaz.
   priceContainer: { 
     backgroundColor: '#f9fafb', 
     padding: '5 12', 
     borderRadius: 4, 
     width: '100%',
     alignItems: 'center',
-    marginTop: 'auto' 
+    marginTop: 'auto' // Her zaman en dibe yaslar
   },
-  price: { fontSize: 12, fontWeight: 'heavy', color: '#111827' },
+  price: { fontSize: 12, fontWeight: 'bold', color: '#111827' }, // 'heavy' font stili roboto'da desteklenmez, 'bold' yapıldı
   
   pageNumber: {
     position: 'absolute',
@@ -127,9 +135,7 @@ const ProductCard = ({ product }) => (
       
       {product.kategori ? (
         <Text style={styles.categoryBadge}>{product.kategori}</Text>
-      ) : (
-        <View style={{ height: 12 }} /> 
-      )}
+      ) : null}
 
       <View style={styles.customFieldsContainer}>
         {product.ekstraOzellikler && Object.entries(product.ekstraOzellikler).map(([key, val], idx) => (
