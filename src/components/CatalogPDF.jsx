@@ -1,7 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
-// Türkçe karakter desteği için stabil Roboto fontları
+// Türkçe karakter desteği için Roboto
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -13,9 +13,9 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: { 
-    paddingTop: 40, 
-    paddingBottom: 30, 
-    paddingHorizontal: 40,
+    paddingTop: 30, 
+    paddingBottom: 20, 
+    paddingHorizontal: 35,
     backgroundColor: '#ffffff', 
     fontFamily: 'Roboto' 
   },
@@ -24,16 +24,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    marginBottom: 25, 
+    marginBottom: 20, 
     borderBottomWidth: 2,
     borderBottomColor: '#f3f4f6',
     borderBottomStyle: 'solid',
     paddingBottom: 10,
-    height: 80 
+    height: 70 
   },
-  logo: { width: 110, height: 60, objectFit: 'contain' },
-  logoPlaceholder: { width: 110, height: 60 },
-  catalogTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', textTransform: 'uppercase' },
+  logo: { width: 100, height: 50, objectFit: 'contain' },
+  logoPlaceholder: { width: 100, height: 50 },
+  catalogTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827', textTransform: 'uppercase' },
   
   gridContainer: { 
     flexDirection: 'row', 
@@ -41,86 +41,83 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   
+  // KUTUCUK YÜKSEKLİĞİ: 215pt olarak güncellendi. (3 satır x 215 = 645pt. Header ve boşluklarla A4'e tam sığar)
   productCard: {
-    width: '48%', 
-    height: 245, // A4 sayfasına 3 adet sığabilecek maksimum yüksekliğe çıkarıldı
-    marginBottom: 15, 
-    padding: 10, // İç boşluk daraltılarak metinlere alan açıldı
+    width: '49%', 
+    height: 215, 
+    marginBottom: 12, 
+    padding: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0', 
     borderStyle: 'solid',
-    borderRadius: 12, 
+    borderRadius: 10,
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#ffffff'
   },
   
   imageContainer: {
-    height: 85, // Metinlere yer açmak için optimize edildi
+    height: 75, // Resim alanı metinlere yer açmak için optimize edildi
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6 
+    marginBottom: 4 
   },
-  image: { width: 85, height: 85, objectFit: 'contain' },
+  image: { width: 75, height: 75, objectFit: 'contain' },
   
   contentBox: { 
     width: '100%', 
     alignItems: 'center',
-    flex: 1, 
-    display: 'flex',
-    flexDirection: 'column'
+    flex: 1
   },
   
   title: { 
-    fontSize: 11, 
+    fontSize: 9.5, 
     fontWeight: 'bold', 
     textAlign: 'center', 
     color: '#1e3a8a', 
-    marginBottom: 2,
-    maxLines: 2, 
-    textOverflow: 'ellipsis' 
+    marginBottom: 1,
+    height: 22, // 2 satıra kadar izin verir
+    lineHeight: 1.1
   },
   
   code: { 
-    fontSize: 8, 
+    fontSize: 7.5, 
     color: '#64748b', 
-    marginBottom: 4, 
+    marginBottom: 3, 
     fontStyle: 'italic' 
   },
   
   categoryBadge: {
     backgroundColor: '#e0f2fe',
     color: '#0284c7',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    fontSize: 7,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 8,
+    fontSize: 6.5,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 6
+    marginBottom: 4
   },
 
+  // ÖZEL ALANLAR: Üst üste binmeyi engellemek için dikey liste yapısı
   customFieldsContainer: {
     width: '100%',
-    flex: 1, 
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
-    marginBottom: 6
+    height: 45, // 3 sütun için sabit dikey alan ayrıldı
+    justifyContent: 'center',
+    overflow: 'hidden'
   },
-  // Üst üste binmeyi engellemek için her özelliği kendi View kutusuna alıyoruz
   customFieldRow: {
     width: '100%',
-    alignItems: 'center',
-    marginBottom: 3
+    marginBottom: 1
   },
   customFieldText: {
     fontSize: 7,
     color: '#475569',
     textAlign: 'center',
-    lineHeight: 1.2
+    lineHeight: 1.1
   },
   customFieldLabel: {
     fontWeight: 'bold',
@@ -129,22 +126,23 @@ const styles = StyleSheet.create({
   
   priceContainer: { 
     backgroundColor: '#10b981', 
-    paddingVertical: 5,
-    paddingHorizontal: 20, 
-    borderRadius: 8, 
+    paddingVertical: 4,
+    paddingHorizontal: 15, 
+    borderRadius: 6, 
     alignItems: 'center',
-    marginTop: 'auto', // En dibe yaslar
+    marginTop: 'auto', // En dibe yaslanır
+    width: '80%'
   },
   price: { 
-    fontSize: 13, 
+    fontSize: 11, 
     fontWeight: 'bold', 
     color: '#ffffff' 
   },
   
   pageNumber: {
     position: 'absolute',
-    fontSize: 9,
-    bottom: 15,
+    fontSize: 8,
+    bottom: 10,
     left: 0,
     right: 0,
     textAlign: 'center',
@@ -160,7 +158,7 @@ const ProductCard = ({ product }) => (
       )}
     </View>
     <View style={styles.contentBox}>
-      <Text style={styles.title} maxLines={2} textOverflow="ellipsis">
+      <Text style={styles.title} maxLines={2}>
         {product.urunAdi}
       </Text>
       
@@ -173,9 +171,8 @@ const ProductCard = ({ product }) => (
       <View style={styles.customFieldsContainer}>
         {product.ekstraOzellikler && Object.entries(product.ekstraOzellikler).map(([key, val], idx) => (
           val ? (
-            // YENİ EKLENEN KISIM: Her metni bir View içine alarak üst üste binmelerini (overlap) engelledik
             <View key={idx} style={styles.customFieldRow}>
-              <Text style={styles.customFieldText} maxLines={2} textOverflow="ellipsis">
+              <Text style={styles.customFieldText} maxLines={1}>
                 <Text style={styles.customFieldLabel}>{key}: </Text>
                 {val}
               </Text>
@@ -192,6 +189,7 @@ const ProductCard = ({ product }) => (
 );
 
 export const CatalogPDF = ({ products, projectName, logoUrl }) => {
+  // Matematiksel Chunking
   const firstPageProducts = products.slice(0, 4);
   const remainingProducts = products.slice(4);
   const otherPages = [];
@@ -218,7 +216,7 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
 
       {otherPages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
-          <View style={[styles.gridContainer, { marginTop: 5 }]}>
+          <View style={styles.gridContainer}>
             {pageGroup.map((product, index) => (
               <ProductCard key={product.id || index} product={product} />
             ))}
