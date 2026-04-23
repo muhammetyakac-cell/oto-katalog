@@ -80,7 +80,8 @@ const createStyles = (theme) => StyleSheet.create({
   coverPage: {
     padding: 0,
     position: 'relative',
-    backgroundColor: '#0b1220'
+    backgroundColor: '#0b1220',
+    fontFamily: 'Roboto'
   },
   coverImage: {
     width: '100%',
@@ -100,8 +101,7 @@ const createStyles = (theme) => StyleSheet.create({
     color: '#ffffff',
     fontSize: 30,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 1.2
+    letterSpacing: 0.4
   },
   coverProject: {
     color: '#e2e8f0',
@@ -239,7 +239,8 @@ const createStyles = (theme) => StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#0f172a',
     paddingHorizontal: 34,
-    paddingVertical: 42
+    paddingVertical: 42,
+    fontFamily: 'Roboto'
   },
   backCoverTitle: {
     color: '#f8fafc',
