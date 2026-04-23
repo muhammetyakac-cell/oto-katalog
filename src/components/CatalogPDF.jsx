@@ -1,7 +1,7 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
-// Türkçe karakter desteği için Roboto
+// Türkçe karakter desteği için stabil Roboto fontları
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -14,7 +14,7 @@ Font.register({
 const styles = StyleSheet.create({
   page: { 
     paddingTop: 40, 
-    paddingBottom: 30, // Alt boşluğu yaklaşık 1 cm'ye sabitlemek için daralttık
+    paddingBottom: 30, 
     paddingHorizontal: 40,
     backgroundColor: '#ffffff', 
     fontFamily: 'Roboto' 
@@ -43,84 +43,106 @@ const styles = StyleSheet.create({
   
   productCard: {
     width: '48%', 
-    height: 240, // Dikey olarak genişletildi (195'ten 240'a)
-    marginBottom: 15, // Satırlar arası boşluk optimize edildi
+    height: 240, 
+    marginBottom: 15, 
     padding: 12,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: '#e2e8f0', // Daha belirgin ve şık bir çerçeve rengi
     borderStyle: 'solid',
-    borderRadius: 10,
+    borderRadius: 12, // Köşeleri biraz daha yumuşattık
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#ffffff'
   },
   
   imageContainer: {
-    height: 125, // Kutu genişlediği için görsel alanını da büyüttük
+    height: 100, // Resmi bir tık ufalttık ki yazılara daha çok yer kalsın
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 6 
+    marginBottom: 8 
   },
-  image: { width: 125, height: 125, objectFit: 'contain' },
+  image: { width: 100, height: 100, objectFit: 'contain' },
   
   contentBox: { 
     width: '100%', 
     alignItems: 'center',
-    flex: 1 
+    flex: 1, // Kalan boşluğu tamamen kapla
+    display: 'flex',
+    flexDirection: 'column'
   },
   
+  // ÜRÜN ADI: Renklendirildi ve satır sınırı kondu
   title: { 
-    fontSize: 10, 
+    fontSize: 11, 
     fontWeight: 'bold', 
     textAlign: 'center', 
-    color: '#1f2937', 
-    marginBottom: 3,
-    height: 24, 
-    lineHeight: 1.2
+    color: '#1e3a8a', // Şık bir Lacivert tonu
+    marginBottom: 2,
+    maxLines: 2, // 2 satırdan fazlasına izin vermez
+    textOverflow: 'ellipsis' // Uzunsa sonuna ... koyar
   },
-  code: { fontSize: 8, color: '#6b7280', marginBottom: 5, fontStyle: 'italic' },
   
+  // STOK KODU: İtalik ve daha belirgin gri
+  code: { 
+    fontSize: 8, 
+    color: '#64748b', 
+    marginBottom: 5, 
+    fontStyle: 'italic' 
+  },
+  
+  // KATEGORİ: Hap (Pill) tasarımlı renkli etiket
   categoryBadge: {
-    backgroundColor: '#eff6ff',
-    color: '#3b82f6',
-    paddingVertical: 2,
+    backgroundColor: '#e0f2fe',
+    color: '#0284c7',
+    paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 4,
+    borderRadius: 10,
     fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 5
+    marginBottom: 6
   },
 
+  // EKSTRA ALANLAR: Taşıp fiyatı bozmasın diye flex:1 ile sıkıştırıldı
   customFieldsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 4,
-    marginBottom: 5
+    width: '100%',
+    flex: 1, // Kalan alanı doldurur ama taşırmaz
+    overflow: 'hidden',
+    alignItems: 'center',
+    marginBottom: 6
   },
-  customFieldBadge: {
-    backgroundColor: '#f3f4f6',
-    color: '#4b5563',
-    paddingVertical: 2,
-    paddingHorizontal: 5,
-    borderRadius: 3,
-    fontSize: 6,
+  customFieldText: {
+    fontSize: 7,
+    color: '#475569',
+    textAlign: 'center',
+    marginBottom: 2,
+    lineHeight: 1.3
+  },
+  customFieldLabel: {
     fontWeight: 'bold',
-    textTransform: 'uppercase'
+    color: '#0f172a'
   },
   
+  // FİYAT KUTUSU: Vurucu Zümrüt Yeşili ve Beyaz Yazı
   priceContainer: { 
-    backgroundColor: '#f9fafb', 
+    backgroundColor: '#10b981', // Zümrüt yeşili
     paddingVertical: 6,
-    paddingHorizontal: 15,
-    borderRadius: 6, 
-    width: '100%',
+    paddingHorizontal: 20, // Daha geniş bir buton hissi
+    borderRadius: 8, 
     alignItems: 'center',
-    marginTop: 'auto' // Fiyat her zaman kutunun en dibinde kalır
+    marginTop: 'auto', // ASLA yukarıdaki metinle çakışmaz, en dibe yapışır
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2
   },
-  price: { fontSize: 13, fontWeight: 'bold', color: '#111827' },
+  price: { 
+    fontSize: 13, 
+    fontWeight: 'bold', 
+    color: '#ffffff' // Beyaz renk
+  },
   
   pageNumber: {
     position: 'absolute',
@@ -141,16 +163,25 @@ const ProductCard = ({ product }) => (
       )}
     </View>
     <View style={styles.contentBox}>
-      <Text style={styles.title}>{product.urunAdi}</Text>
+      <Text style={styles.title} maxLines={2} textOverflow="ellipsis">
+        {product.urunAdi}
+      </Text>
+      
       <Text style={styles.code}>{product.stokKodu}</Text>
       
       {product.kategori ? (
         <Text style={styles.categoryBadge}>{product.kategori}</Text>
       ) : null}
 
+      {/* Ekstra özellikler uzun metin dahi olsa taşıp fiyatı bozamaz */}
       <View style={styles.customFieldsContainer}>
         {product.ekstraOzellikler && Object.entries(product.ekstraOzellikler).map(([key, val], idx) => (
-          val ? <Text key={idx} style={styles.customFieldBadge}>{key}: {val}</Text> : null
+          val ? (
+            <Text key={idx} style={styles.customFieldText} maxLines={3} textOverflow="ellipsis">
+              <Text style={styles.customFieldLabel}>{key}: </Text>
+              {val}
+            </Text>
+          ) : null
         ))}
       </View>
 
@@ -172,7 +203,6 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
 
   return (
     <Document>
-      {/* İlk Sayfa */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
@@ -187,7 +217,6 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
         <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
       </Page>
 
-      {/* Diğer Sayfalar */}
       {otherPages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
           <View style={[styles.gridContainer, { marginTop: 5 }]}>
