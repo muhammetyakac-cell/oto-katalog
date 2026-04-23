@@ -79,8 +79,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#1e3a8a',
     marginBottom: 2,
-    minHeight: 24,
-    lineHeight: 1.15
+    height: 30,
+    lineHeight: 1.15,
+    overflow: 'hidden'
   },
 
   code: {
@@ -111,9 +112,10 @@ const styles = StyleSheet.create({
   },
   customFieldRow: {
     width: '100%',
-    minHeight: 17,
+    height: 18,
     marginBottom: 1,
-    justifyContent: 'center'
+    justifyContent: 'center',
+    overflow: 'hidden'
   },
   customFieldText: {
     fontSize: 7,
@@ -152,7 +154,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const truncate = (value, maxLength = 64) => {
+const truncate = (value, maxLength = 140) => {
   if (value === null || value === undefined) return '';
   const text = String(value).replace(/\s+/g, ' ').trim();
   if (!text) return '';
@@ -173,19 +175,19 @@ const ProductCard = ({ product }) => {
       </View>
 
       <View style={styles.contentBox}>
-        <Text style={styles.title}>{truncate(product.urunAdi, 70)}</Text>
-        <Text style={styles.code}>{truncate(product.stokKodu, 26)}</Text>
+        <Text style={styles.title}>{truncate(product.urunAdi, 140)}</Text>
+        <Text style={styles.code}>{truncate(product.stokKodu, 60)}</Text>
 
         {product.kategori ? (
-          <Text style={styles.categoryBadge}>{truncate(product.kategori, 26)}</Text>
+          <Text style={styles.categoryBadge}>{truncate(product.kategori, 52)}</Text>
         ) : null}
 
         <View style={styles.customFieldsContainer}>
           {visibleFields.map(([key, val], idx) => (
             <View key={`${key}-${idx}`} style={styles.customFieldRow}>
               <Text style={styles.customFieldText}>
-                <Text style={styles.customFieldLabel}>{truncate(key, 14)}: </Text>
-                {truncate(val, 72)}
+                <Text style={styles.customFieldLabel}>{truncate(key, 28)}: </Text>
+                {truncate(val, 260)}
               </Text>
             </View>
           ))}
