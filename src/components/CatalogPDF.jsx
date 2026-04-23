@@ -1,7 +1,7 @@
-import React from 'react';
+,import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
 
-// Cloudflare üzerinden ASLA patlamayan, en stabil Türkçe destekli Roboto fontları
+// Türkçe karakter desteği için Roboto
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -12,13 +12,19 @@ Font.register({
 });
 
 const styles = StyleSheet.create({
-  page: { padding: 40, backgroundColor: '#ffffff', fontFamily: 'Roboto' },
+  page: { 
+    paddingTop: 40, 
+    paddingBottom: 30, // Alt boşluğu yaklaşık 1 cm'ye sabitlemek için daralttık
+    paddingHorizontal: 40,
+    backgroundColor: '#ffffff', 
+    fontFamily: 'Roboto' 
+  },
   
   header: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    marginBottom: 30, 
+    marginBottom: 25, 
     borderBottomWidth: 2,
     borderBottomColor: '#f3f4f6',
     borderBottomStyle: 'solid',
@@ -32,31 +38,31 @@ const styles = StyleSheet.create({
   gridContainer: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
-    justifyContent: 'space-between' 
+    justifyContent: 'space-between'
   },
   
   productCard: {
     width: '48%', 
-    height: 195, 
-    marginBottom: 20,
-    padding: 10,
+    height: 240, // Dikey olarak genişletildi (195'ten 240'a)
+    marginBottom: 15, // Satırlar arası boşluk optimize edildi
+    padding: 12,
     borderWidth: 1,
     borderColor: '#f3f4f6',
     borderStyle: 'solid',
-    borderRadius: 8,
+    borderRadius: 10,
     flexDirection: 'column',
     alignItems: 'center'
   },
   
   imageContainer: {
-    height: 85, 
+    height: 125, // Kutu genişlediği için görsel alanını da büyüttük
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4 
+    marginBottom: 6 
   },
-  image: { width: 85, height: 85, objectFit: 'contain' },
+  image: { width: 125, height: 125, objectFit: 'contain' },
   
   contentBox: { 
     width: '100%', 
@@ -69,36 +75,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     textAlign: 'center', 
     color: '#1f2937', 
-    marginBottom: 2,
+    marginBottom: 3,
     height: 24, 
     lineHeight: 1.2
   },
-  code: { fontSize: 8, color: '#6b7280', marginBottom: 4, fontStyle: 'italic' },
+  code: { fontSize: 8, color: '#6b7280', marginBottom: 5, fontStyle: 'italic' },
   
   categoryBadge: {
     backgroundColor: '#eff6ff',
     color: '#3b82f6',
     paddingVertical: 2,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     borderRadius: 4,
     fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginBottom: 4
+    marginBottom: 5
   },
 
   customFieldsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 3,
-    marginBottom: 4
+    gap: 4,
+    marginBottom: 5
   },
   customFieldBadge: {
     backgroundColor: '#f3f4f6',
     color: '#4b5563',
     paddingVertical: 2,
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
     borderRadius: 3,
     fontSize: 6,
     fontWeight: 'bold',
@@ -107,19 +113,19 @@ const styles = StyleSheet.create({
   
   priceContainer: { 
     backgroundColor: '#f9fafb', 
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 4, 
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 6, 
     width: '100%',
     alignItems: 'center',
-    marginTop: 'auto' 
+    marginTop: 'auto' // Fiyat her zaman kutunun en dibinde kalır
   },
-  price: { fontSize: 12, fontWeight: 'bold', color: '#111827' },
+  price: { fontSize: 13, fontWeight: 'bold', color: '#111827' },
   
   pageNumber: {
     position: 'absolute',
-    fontSize: 10,
-    bottom: 20,
+    fontSize: 9,
+    bottom: 15,
     left: 0,
     right: 0,
     textAlign: 'center',
@@ -166,6 +172,7 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
 
   return (
     <Document>
+      {/* İlk Sayfa */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
@@ -180,9 +187,10 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
         <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} fixed />
       </Page>
 
+      {/* Diğer Sayfalar */}
       {otherPages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
-          <View style={[styles.gridContainer, { marginTop: 10 }]}>
+          <View style={[styles.gridContainer, { marginTop: 5 }]}>
             {pageGroup.map((product, index) => (
               <ProductCard key={product.id || index} product={product} />
             ))}
