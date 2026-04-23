@@ -13,8 +13,8 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 18,
+    paddingBottom: 18,
     paddingHorizontal: 30,
     backgroundColor: '#ffffff',
     fontFamily: 'Roboto'
@@ -24,12 +24,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 10,
     borderBottomWidth: 2,
     borderBottomColor: '#f3f4f6',
     borderBottomStyle: 'solid',
     paddingBottom: 8,
-    height: 58
+    height: 54
   },
   logo: { width: 96, height: 44, objectFit: 'contain' },
   logoPlaceholder: { width: 96, height: 44 },
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
   // Kartlar özellikle dikey olarak genişletildi ve sabit alanlara bölündü.
   productCard: {
     width: '49%',
-    height: 222,
-    marginBottom: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    height: 236,
+    marginBottom: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 11,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     borderStyle: 'solid',
@@ -58,14 +58,23 @@ const styles = StyleSheet.create({
   },
 
   imageContainer: {
-    height: 76,
+    height: 84,
     width: '100%',
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'solid',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 4
+    marginBottom: 6
   },
-  image: { width: 75, height: 75, objectFit: 'contain' },
+  image: { width: 78, height: 78, objectFit: 'contain' },
+  imagePlaceholderText: {
+    fontSize: 8,
+    color: '#94a3b8'
+  },
 
   contentBox: {
     width: '100%',
@@ -74,21 +83,21 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#1e3a8a',
-    marginBottom: 2,
-    height: 30,
-    lineHeight: 1.15,
+    color: '#0f172a',
+    marginBottom: 3,
+    height: 34,
+    lineHeight: 1.2,
     overflow: 'hidden'
   },
 
   code: {
-    fontSize: 7.5,
-    color: '#64748b',
-    marginBottom: 4,
-    fontStyle: 'italic'
+    fontSize: 8,
+    color: '#334155',
+    marginBottom: 5,
+    fontWeight: 'bold'
   },
 
   categoryBadge: {
@@ -97,7 +106,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: 6,
     borderRadius: 8,
-    fontSize: 6.5,
+    fontSize: 7,
     fontWeight: 'bold',
     textTransform: 'uppercase',
     marginBottom: 5
@@ -106,20 +115,19 @@ const styles = StyleSheet.create({
   customFieldsContainer: {
     width: '100%',
     alignItems: 'center',
-    minHeight: 56,
+    minHeight: 60,
     justifyContent: 'flex-start',
     overflow: 'hidden'
   },
   customFieldRow: {
     width: '100%',
-    height: 18,
-    marginBottom: 1,
+    height: 19,
     justifyContent: 'center',
     overflow: 'hidden'
   },
   customFieldText: {
-    fontSize: 7,
-    color: '#475569',
+    fontSize: 7.2,
+    color: '#334155',
     textAlign: 'center',
     lineHeight: 1.2
   },
@@ -130,15 +138,15 @@ const styles = StyleSheet.create({
 
   priceContainer: {
     backgroundColor: '#10b981',
-    paddingVertical: 4,
+    paddingVertical: 5,
     paddingHorizontal: 15,
-    borderRadius: 6,
+    borderRadius: 7,
     alignItems: 'center',
     marginTop: 'auto',
     width: '82%'
   },
   price: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#ffffff'
   },
@@ -171,7 +179,9 @@ const ProductCard = ({ product }) => {
       <View style={styles.imageContainer}>
         {product.resimUrl ? (
           <Image src={product.resimUrl} style={styles.image} />
-        ) : null}
+        ) : (
+          <Text style={styles.imagePlaceholderText}>Görsel Yok</Text>
+        )}
       </View>
 
       <View style={styles.contentBox}>
@@ -212,12 +222,10 @@ export const CatalogPDF = ({ products, projectName, logoUrl }) => {
     <Document>
       {pages.map((pageGroup, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
-          {pageIndex === 0 ? (
-            <View style={styles.header}>
-              {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
-              <Text style={styles.catalogTitle}>{projectName}</Text>
-            </View>
-          ) : null}
+          <View style={styles.header}>
+            {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : <View style={styles.logoPlaceholder} />}
+            <Text style={styles.catalogTitle}>{projectName}</Text>
+          </View>
 
           <View style={styles.gridContainer}>
             {pageGroup.map((product, index) => (
