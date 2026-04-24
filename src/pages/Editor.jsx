@@ -27,7 +27,7 @@ export default function Editor() {
   const [isSaving, setIsSaving] = useState(false);
   const [pdfReady, setPdfReady] = useState(false);
   const [loading, setLoading] = useState(!!projectId);
-  const [isProcessing, setIsProcessing] = useState(false); // Editör işlemleri için loader
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const [themeKey, setThemeKey] = useState('emeraldNavy');
   const [includeCoverPage, setIncludeCoverPage] = useState(false);
@@ -76,7 +76,6 @@ export default function Editor() {
     setPdfReady(false);
   }, [products, projectName, logoUrl, themeKey, includeCoverPage, coverImageUrl, coverTitle, includeBackCoverPage, backCoverContact]);
 
-  // RESİM SIKIŞTIRMA (Yeni Sistem İçin)
   const resizeAndEncodeImage = (file, { maxWidth, maxHeight, quality = 0.5 }) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -99,7 +98,6 @@ export default function Editor() {
     reader.readAsDataURL(file);
   });
 
-  // STORAGE YÜKLEME (Yeni Sistem)
   const uploadImageToStorage = async (file) => {
     try {
       const fileExt = 'jpg';
@@ -123,7 +121,6 @@ export default function Editor() {
     }
   };
 
-  // DIŞ LİNKTEN ÇEKİP STORAGE'A ATMA (Editördeki link değişimleri için)
   const pullImageFromUrl = async (url) => {
     try {
       if (url.includes('supabase.co/storage')) return url;
@@ -163,7 +160,6 @@ export default function Editor() {
     setCoverImageUrl(base64);
   };
 
-  // ESKİ SİSTEM: Excel'den gelen linkleri olduğu gibi (weserv proxy ile) eşleştirir
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {
       const ekstraObj = {};
@@ -374,7 +370,6 @@ export default function Editor() {
                 </div>
               </div>
 
-              {/* TEMA VE TOPLU İŞLEMLER */}
               <div className="flex flex-wrap items-start gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><Palette className="w-3 h-3" /> Tema</label>
@@ -421,7 +416,40 @@ export default function Editor() {
               </div>
             </div>
 
-            {/* KAPAK AYARLARI VE PDF BUTONLARI AYNI KALSIN... */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-black text-gray-700">Özel Kapak (Opsiyonel)</h4>
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
+                    <input type="checkbox" checked={includeCoverPage} onChange={(e) => setIncludeCoverPage(e.target.checked)} className="accent-blue-600" />
+                    Aktif
+                  </label>
+                </div>
+                <input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kapak Başlığı" />
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold text-blue-600 cursor-pointer hover:bg-blue-50 transition-all shadow-sm">
+                    <UploadCloud className="w-3 h-3" /> Kapak Görseli Yükle
+                    <input type="file" className="hidden" onChange={handleCoverUpload} accept="image/*" />
+                  </label>
+                  {coverImageUrl && <button onClick={() => setCoverImageUrl('')} className="text-[11px] text-red-500 font-bold hover:underline">KALDIR</button>}
+                </div>
+                <p className="text-[11px] text-gray-500">Tam sayfa görsel önerilir (A4 dikey oran).</p>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-black text-gray-700">Arka Kapak / İletişim (Opsiyonel)</h4>
+                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
+                    <input type="checkbox" checked={includeBackCoverPage} onChange={(e) => setIncludeBackCoverPage(e.target.checked)} className="accent-blue-600" />
+                    Aktif
+                  </label>
+                </div>
+                <input type="text" value={backCoverContact.address} onChange={(e) => setBackCoverContact(prev => ({ ...prev, address: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Adres" />
+                <input type="text" value={backCoverContact.phone} onChange={(e) => setBackCoverContact(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Telefon" />
+                <input type="text" value={backCoverContact.website} onChange={(e) => setBackCoverContact(prev => ({ ...prev, website: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Web Sitesi" />
+              </div>
+            </div>
+
             <div className="flex gap-4 justify-end items-center pt-6 border-t border-gray-100">
               <button onClick={saveToDatabase} disabled={isSaving} className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
                 <Save className="w-5 h-5" /> {isSaving ? 'Kaydediliyor...' : 'Taslağı Kaydet'}
@@ -457,7 +485,6 @@ export default function Editor() {
             </div>
           </div>
 
-          {/* ÜRÜN LİSTESİ VE RESİM DEĞİŞTİRME (YENİ SİSTEM BURADA) */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left">
               <thead>
@@ -488,7 +515,6 @@ export default function Editor() {
                         
                         {editingImageId === product.id ? (
                           <div className="flex flex-col gap-2 w-32">
-                            {/* YENİ SİSTEM: Editörde Değişim Yapılırsa Storage'a Gider */}
                             <label className={`text-[10px] font-bold bg-blue-600 text-white px-2 py-1.5 rounded-md cursor-pointer text-center hover:bg-blue-700 transition ${isProcessing ? 'opacity-50' : ''}`}>
                               {isProcessing ? 'YÜKLENİYOR...' : 'PC\'DEN SEÇ'}
                               <input 
@@ -517,7 +543,6 @@ export default function Editor() {
                               <button onClick={async () => {
                                 if (tempImageUrl) {
                                   setIsProcessing(true);
-                                  // Editörde link elle değişirse de yeni sistemle Storage'a çekiyoruz
                                   const finalUrl = await pullImageFromUrl(tempImageUrl);
                                   setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: finalUrl} : p));
                                   setIsProcessing(false);
@@ -534,7 +559,6 @@ export default function Editor() {
                         )}
                       </div>
 
-                      {/* ÜRÜN BİLGİLERİ AYNI KALSIN... */}
                       <div className="flex-1 space-y-2">
                         <input type="text" value={product.stokKodu} onChange={(e) => setProducts(products.map(p => p.id === product.id ? {...p, stokKodu: e.target.value} : p))} className="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-full outline-none" />
                         <input type="text" value={product.urunAdi} onChange={(e) => setProducts(products.map(p => p.id === product.id ? {...p, urunAdi: e.target.value} : p))} className="text-xl font-bold text-gray-800 bg-transparent block w-full outline-none border-b border-transparent focus:border-blue-200" />
@@ -578,7 +602,6 @@ export default function Editor() {
             </table>
           </div>
 
-          {/* SIRALAMA DEĞİŞTİRİCİ AYNI KALSIN... */}
           <div className="fixed bottom-8 right-8 bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-3 z-50">
             <div className="flex items-center gap-2 mb-1">
               <ArrowLeftRight className="w-4 h-4 text-blue-600" />
