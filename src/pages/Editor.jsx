@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { 
   UploadCloud, Settings2, CheckCircle2, Save, 
   RefreshCw, Download, ArrowLeft, Image as ImageIcon,
-  Edit2, ArrowLeftRight, Trash2, PlusCircle, X, Palette, Bell
+  Edit2, ArrowLeftRight, Trash2, PlusCircle, X, Palette
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -43,7 +43,7 @@ export default function Editor() {
   const [bulkCategory, setBulkCategory] = useState('');
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
 
-  // YENİ: Bildirim State'i
+  // PDF İndirme Bildirimi State'i
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function Editor() {
               fiyat: p.fiyat, 
               resimUrl: p.resim_url, 
               kategori: p.kategori,
-              ekstraOzellikler: p.ekstra_ozellikler || {}
+              ekstraOzellikler: p.ekstra_ozellikler || {} 
             })));
           }
         } catch (error) { console.error(error); } finally { setLoading(false); }
@@ -76,30 +76,7 @@ export default function Editor() {
     setPdfReady(false);
   }, [products, projectName, logoUrl, themeKey, includeCoverPage, coverImageUrl, coverTitle, includeBackCoverPage, backCoverContact]);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
-      const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-      setRawRows(jsonData);
-      setColumns(Object.keys(jsonData[0]));
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    resizeAndEncodeImage(file, { maxWidth: 500, maxHeight: 220, quality: 0.8 }).then(setLogoUrl);
-  };
-
-  const handleCoverUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    resizeAndEncodeImage(file, { maxWidth: 1240, maxHeight: 1754, quality: 0.78 }).then(setCoverImageUrl);
-  };
-
+  // RESİM SIKIŞTIRMA: Boyutlar ve kalite Supabase kotasını korumak için agresif ayarlandı
   const resizeAndEncodeImage = (file, { maxWidth, maxHeight, quality = 0.5 }) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -121,6 +98,56 @@ export default function Editor() {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+
+  // STORAGE YÜKLEME: Resimleri product-images bucket'ına yükler
+  const uploadImageToStorage = async (file) => {
+    try {
+      const fileExt = 'jpg';
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${projectId || 'temp'}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Storage Hatası:', error.message);
+      return null;
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
+      const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+      setRawRows(jsonData);
+      setColumns(Object.keys(jsonData[0]));
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const base64 = await resizeAndEncodeImage(file, { maxWidth: 500, maxHeight: 220, quality: 0.8 });
+    setLogoUrl(base64);
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const base64 = await resizeAndEncodeImage(file, { maxWidth: 1240, maxHeight: 1754, quality: 0.78 });
+    setCoverImageUrl(base64);
+  };
 
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {
@@ -156,7 +183,7 @@ export default function Editor() {
       const insertData = products.map(p => ({
         project_id: curId, stok_kodu: p.stokKodu, urun_adi: p.urunAdi,
         fiyat: p.fiyat, resim_url: p.resimUrl, kategori: p.kategori,
-        ekstra_ozellikler: p.ekstraOzellikler
+        ekstra_ozellikler: p.ekstraOzellikler 
       }));
 
       await supabase.from('products').insert(insertData);
@@ -215,13 +242,10 @@ export default function Editor() {
     setSelectedIds([]); setLastSelectedIndex(null);
   };
 
-  // YENİ: İndirme butonuna tıklandığında bildirimi gösteren fonksiyon
+  // İndirme Bildirimi Tetikleyici
   const handleDownloadClick = () => {
     setShowToast(true);
-    // 5 Saniye sonra bildirimi kapatır
-    setTimeout(() => {
-      setShowToast(false);
-    }, 5000);
+    setTimeout(() => setShowToast(false), 5000);
   };
 
   if (loading) return <div className="p-20 text-center font-bold text-blue-600">Taslak Yükleniyor...</div>;
@@ -229,7 +253,7 @@ export default function Editor() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-4 relative">
       
-      {/* YENİ: Başarı Bildirimi (Toast) */}
+      {/* BAŞARI BİLDİRİMİ (TOAST) */}
       {showToast && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-[9999] border border-gray-700 animate-bounce">
           <div className="bg-green-500 rounded-full p-1">
@@ -429,7 +453,6 @@ export default function Editor() {
                   <RefreshCw className="w-5 h-5" /> KATALOĞU HAZIRLA
                 </button>
               ) : (
-                // YENİ: PDF İndir Butonuna Tıklama Olayı (onClick) Eklendi
                 <div onClick={handleDownloadClick}>
                   <PDFDownloadLink 
                     document={(
@@ -485,20 +508,26 @@ export default function Editor() {
                         
                         {editingImageId === product.id ? (
                           <div className="flex flex-col gap-2 w-32">
+                            {/* PC'DEN STORAGE'A YÜKLEME BUTONU */}
                             <label className="text-[10px] font-bold bg-blue-600 text-white px-2 py-1.5 rounded-md cursor-pointer text-center hover:bg-blue-700 transition">
                               PC'DEN DOSYA SEÇ
                               <input 
                                 type="file" 
                                 className="hidden" 
                                 accept="image/*"
-                                onChange={(e) => {
+                                onChange={async (e) => {
                                   const file = e.target.files[0];
                                   if (file) {
-                                    resizeAndEncodeImage(file, { maxWidth: 200, maxHeight: 200, quality: 0.5 })
-                                      .then(base64 => {
-                                        setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: base64} : p));
-                                        setEditingImageId(null);
-                                      });
+                                    // Sıkıştır -> Blob Yap -> Storage'a At
+                                    const base64 = await resizeAndEncodeImage(file, { maxWidth: 300, maxHeight: 300, quality: 0.5 });
+                                    const blob = await (await fetch(base64)).blob();
+                                    const compressedFile = new File([blob], 'product.jpg', { type: 'image/jpeg' });
+                                    
+                                    const url = await uploadImageToStorage(compressedFile);
+                                    if (url) {
+                                      setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: url} : p));
+                                      setEditingImageId(null);
+                                    }
                                   }
                                 }}
                               />
@@ -511,7 +540,7 @@ export default function Editor() {
                                 setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: finalUrl} : p));
                                 setEditingImageId(null);
                               }} className="text-[10px] font-bold bg-green-500 text-white px-2 py-1 rounded-md flex-1 hover:bg-green-600">Tamam</button>
-                              <button onClick={() => setEditingImageId(null)} className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300">İptal</button>
+                              <button onClick={() => setEditingImageId(null)} className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300 flex-1">İptal</button>
                             </div>
                           </div>
                         ) : (
