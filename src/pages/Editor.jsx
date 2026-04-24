@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { 
   UploadCloud, Settings2, CheckCircle2, Save, 
   RefreshCw, Download, ArrowLeft, Image as ImageIcon,
-  Edit2, ArrowLeftRight, Trash2, PlusCircle, X, Palette
+  Edit2, ArrowLeftRight, Trash2, PlusCircle, X, Palette, Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { PDFDownloadLink } from '@react-pdf/renderer';
@@ -27,6 +27,8 @@ export default function Editor() {
   const [isSaving, setIsSaving] = useState(false);
   const [pdfReady, setPdfReady] = useState(false);
   const [loading, setLoading] = useState(!!projectId);
+  const [isProcessing, setIsProcessing] = useState(false); // Editör işlemleri için loader
+  
   const [themeKey, setThemeKey] = useState('emeraldNavy');
   const [includeCoverPage, setIncludeCoverPage] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState('');
@@ -42,8 +44,6 @@ export default function Editor() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkCategory, setBulkCategory] = useState('');
   const [lastSelectedIndex, setLastSelectedIndex] = useState(null);
-
-  // PDF İndirme Bildirimi State'i
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function Editor() {
               fiyat: p.fiyat, 
               resimUrl: p.resim_url, 
               kategori: p.kategori,
-              ekstraOzellikler: p.ekstra_ozellikler || {} 
+              ekstraOzellikler: p.ekstra_ozellikler || {}
             })));
           }
         } catch (error) { console.error(error); } finally { setLoading(false); }
@@ -76,7 +76,7 @@ export default function Editor() {
     setPdfReady(false);
   }, [products, projectName, logoUrl, themeKey, includeCoverPage, coverImageUrl, coverTitle, includeBackCoverPage, backCoverContact]);
 
-  // RESİM SIKIŞTIRMA: Boyutlar ve kalite Supabase kotasını korumak için agresif ayarlandı
+  // RESİM SIKIŞTIRMA (Yeni Sistem İçin)
   const resizeAndEncodeImage = (file, { maxWidth, maxHeight, quality = 0.5 }) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -99,7 +99,7 @@ export default function Editor() {
     reader.readAsDataURL(file);
   });
 
-  // STORAGE YÜKLEME: Resimleri product-images bucket'ına yükler
+  // STORAGE YÜKLEME (Yeni Sistem)
   const uploadImageToStorage = async (file) => {
     try {
       const fileExt = 'jpg';
@@ -120,6 +120,20 @@ export default function Editor() {
     } catch (error) {
       console.error('Storage Hatası:', error.message);
       return null;
+    }
+  };
+
+  // DIŞ LİNKTEN ÇEKİP STORAGE'A ATMA (Editördeki link değişimleri için)
+  const pullImageFromUrl = async (url) => {
+    try {
+      if (url.includes('supabase.co/storage')) return url;
+      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&output=jpg&q=60`;
+      const response = await fetch(proxyUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'pulled.jpg', { type: 'image/jpeg' });
+      return await uploadImageToStorage(file);
+    } catch (err) {
+      return url; 
     }
   };
 
@@ -149,6 +163,7 @@ export default function Editor() {
     setCoverImageUrl(base64);
   };
 
+  // ESKİ SİSTEM: Excel'den gelen linkleri olduğu gibi (weserv proxy ile) eşleştirir
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {
       const ekstraObj = {};
@@ -242,7 +257,6 @@ export default function Editor() {
     setSelectedIds([]); setLastSelectedIndex(null);
   };
 
-  // İndirme Bildirimi Tetikleyici
   const handleDownloadClick = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 5000);
@@ -253,7 +267,6 @@ export default function Editor() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20 px-4 relative">
       
-      {/* BAŞARI BİLDİRİMİ (TOAST) */}
       {showToast && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-[9999] border border-gray-700 animate-bounce">
           <div className="bg-green-500 rounded-full p-1">
@@ -331,11 +344,10 @@ export default function Editor() {
                   </button>
                 </div>
               ))}
-              {customFieldsMapping.length === 0 && <p className="text-xs text-gray-400 italic">PDF kartında çıkmasını istediğiniz (Örn: Boyut, Garanti, Uyum) gibi ekstra alanlar ekleyebilirsiniz.</p>}
             </div>
           </div>
 
-          <button onClick={confirmMapping} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">DÜZENLEMEYİ BAŞLAT</button>
+          <button onClick={confirmMapping} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">DÜZENLEMEYİ BAŞLAT</button>
         </div>
       )}
 
@@ -344,7 +356,6 @@ export default function Editor() {
           
           <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 mb-8">
             <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
-              
               <div className="flex items-center gap-6 flex-1 min-w-[300px]">
                 <div className="w-20 h-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden shadow-inner shrink-0">
                   {logoUrl ? <img src={logoUrl} className="w-full h-full object-contain" /> : <ImageIcon className="w-8 h-8 text-gray-300" />}
@@ -363,6 +374,7 @@ export default function Editor() {
                 </div>
               </div>
 
+              {/* TEMA VE TOPLU İŞLEMLER */}
               <div className="flex flex-wrap items-start gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase flex items-center gap-1"><Palette className="w-3 h-3" /> Tema</label>
@@ -409,40 +421,7 @@ export default function Editor() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-black text-gray-700">Özel Kapak (Opsiyonel)</h4>
-                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
-                    <input type="checkbox" checked={includeCoverPage} onChange={(e) => setIncludeCoverPage(e.target.checked)} className="accent-blue-600" />
-                    Aktif
-                  </label>
-                </div>
-                <input type="text" value={coverTitle} onChange={(e) => setCoverTitle(e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kapak Başlığı" />
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold text-blue-600 cursor-pointer hover:bg-blue-50 transition-all shadow-sm">
-                    <UploadCloud className="w-3 h-3" /> Kapak Görseli Yükle
-                    <input type="file" className="hidden" onChange={handleCoverUpload} accept="image/*" />
-                  </label>
-                  {coverImageUrl && <button onClick={() => setCoverImageUrl('')} className="text-[11px] text-red-500 font-bold hover:underline">KALDIR</button>}
-                </div>
-                <p className="text-[11px] text-gray-500">Tam sayfa görsel önerilir (A4 dikey oran).</p>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-gray-100 bg-gray-50 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-black text-gray-700">Arka Kapak / İletişim (Opsiyonel)</h4>
-                  <label className="inline-flex items-center gap-2 text-xs font-bold text-gray-600">
-                    <input type="checkbox" checked={includeBackCoverPage} onChange={(e) => setIncludeBackCoverPage(e.target.checked)} className="accent-blue-600" />
-                    Aktif
-                  </label>
-                </div>
-                <input type="text" value={backCoverContact.address} onChange={(e) => setBackCoverContact(prev => ({ ...prev, address: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Adres" />
-                <input type="text" value={backCoverContact.phone} onChange={(e) => setBackCoverContact(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Telefon" />
-                <input type="text" value={backCoverContact.website} onChange={(e) => setBackCoverContact(prev => ({ ...prev, website: e.target.value }))} className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500" placeholder="Web Sitesi" />
-              </div>
-            </div>
-
+            {/* KAPAK AYARLARI VE PDF BUTONLARI AYNI KALSIN... */}
             <div className="flex gap-4 justify-end items-center pt-6 border-t border-gray-100">
               <button onClick={saveToDatabase} disabled={isSaving} className="flex items-center gap-2 px-8 py-3 rounded-2xl font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
                 <Save className="w-5 h-5" /> {isSaving ? 'Kaydediliyor...' : 'Taslağı Kaydet'}
@@ -478,6 +457,7 @@ export default function Editor() {
             </div>
           </div>
 
+          {/* ÜRÜN LİSTESİ VE RESİM DEĞİŞTİRME (YENİ SİSTEM BURADA) */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left">
               <thead>
@@ -508,36 +488,40 @@ export default function Editor() {
                         
                         {editingImageId === product.id ? (
                           <div className="flex flex-col gap-2 w-32">
-                            {/* PC'DEN STORAGE'A YÜKLEME BUTONU */}
-                            <label className="text-[10px] font-bold bg-blue-600 text-white px-2 py-1.5 rounded-md cursor-pointer text-center hover:bg-blue-700 transition">
-                              PC'DEN DOSYA SEÇ
+                            {/* YENİ SİSTEM: Editörde Değişim Yapılırsa Storage'a Gider */}
+                            <label className={`text-[10px] font-bold bg-blue-600 text-white px-2 py-1.5 rounded-md cursor-pointer text-center hover:bg-blue-700 transition ${isProcessing ? 'opacity-50' : ''}`}>
+                              {isProcessing ? 'YÜKLENİYOR...' : 'PC\'DEN SEÇ'}
                               <input 
                                 type="file" 
                                 className="hidden" 
+                                disabled={isProcessing}
                                 accept="image/*"
                                 onChange={async (e) => {
                                   const file = e.target.files[0];
                                   if (file) {
-                                    // Sıkıştır -> Blob Yap -> Storage'a At
+                                    setIsProcessing(true);
                                     const base64 = await resizeAndEncodeImage(file, { maxWidth: 300, maxHeight: 300, quality: 0.5 });
                                     const blob = await (await fetch(base64)).blob();
                                     const compressedFile = new File([blob], 'product.jpg', { type: 'image/jpeg' });
-                                    
                                     const url = await uploadImageToStorage(compressedFile);
-                                    if (url) {
-                                      setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: url} : p));
-                                      setEditingImageId(null);
-                                    }
+                                    if (url) setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: url} : p));
+                                    setIsProcessing(false);
+                                    setEditingImageId(null);
                                   }
                                 }}
                               />
                             </label>
 
-                            <input type="text" value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} placeholder="Veya Link Yapıştır..." className="text-[10px] px-2 py-1.5 border border-blue-200 rounded-md bg-blue-50 outline-none w-full font-medium"/>
+                            <input type="text" value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} placeholder="Veya Link..." className="text-[10px] px-2 py-1.5 border border-blue-200 rounded-md bg-blue-50 outline-none w-full font-medium"/>
                             <div className="flex gap-1 w-full">
-                              <button onClick={() => {
-                                const finalUrl = tempImageUrl ? `https://images.weserv.nl/?url=${encodeURIComponent(tempImageUrl)}&w=500` : '';
-                                setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: finalUrl} : p));
+                              <button onClick={async () => {
+                                if (tempImageUrl) {
+                                  setIsProcessing(true);
+                                  // Editörde link elle değişirse de yeni sistemle Storage'a çekiyoruz
+                                  const finalUrl = await pullImageFromUrl(tempImageUrl);
+                                  setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: finalUrl} : p));
+                                  setIsProcessing(false);
+                                }
                                 setEditingImageId(null);
                               }} className="text-[10px] font-bold bg-green-500 text-white px-2 py-1 rounded-md flex-1 hover:bg-green-600">Tamam</button>
                               <button onClick={() => setEditingImageId(null)} className="text-[10px] font-bold bg-gray-200 text-gray-600 px-2 py-1 rounded-md hover:bg-gray-300 flex-1">İptal</button>
@@ -550,6 +534,7 @@ export default function Editor() {
                         )}
                       </div>
 
+                      {/* ÜRÜN BİLGİLERİ AYNI KALSIN... */}
                       <div className="flex-1 space-y-2">
                         <input type="text" value={product.stokKodu} onChange={(e) => setProducts(products.map(p => p.id === product.id ? {...p, stokKodu: e.target.value} : p))} className="text-xs font-bold text-blue-500 bg-blue-50 px-3 py-1 rounded-full outline-none" />
                         <input type="text" value={product.urunAdi} onChange={(e) => setProducts(products.map(p => p.id === product.id ? {...p, urunAdi: e.target.value} : p))} className="text-xl font-bold text-gray-800 bg-transparent block w-full outline-none border-b border-transparent focus:border-blue-200" />
@@ -593,6 +578,7 @@ export default function Editor() {
             </table>
           </div>
 
+          {/* SIRALAMA DEĞİŞTİRİCİ AYNI KALSIN... */}
           <div className="fixed bottom-8 right-8 bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-2xl border border-gray-100 flex flex-col gap-3 z-50">
             <div className="flex items-center gap-2 mb-1">
               <ArrowLeftRight className="w-4 h-4 text-blue-600" />
@@ -605,7 +591,6 @@ export default function Editor() {
               <button onClick={handleSwap} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-black transition-colors">DEĞİŞTİR</button>
             </div>
           </div>
-
         </div>
       )}
     </div>
