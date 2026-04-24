@@ -121,19 +121,6 @@ export default function Editor() {
     }
   };
 
-  const pullImageFromUrl = async (url) => {
-    try {
-      if (url.includes('supabase.co/storage')) return url;
-      const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=300&h=300&output=jpg&q=60`;
-      const response = await fetch(proxyUrl);
-      const blob = await response.blob();
-      const file = new File([blob], 'pulled.jpg', { type: 'image/jpeg' });
-      return await uploadImageToStorage(file);
-    } catch (err) {
-      return url; 
-    }
-  };
-
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -160,6 +147,7 @@ export default function Editor() {
     setCoverImageUrl(base64);
   };
 
+  // EXCEL SİSTEMİ: Kullanıcının istediği gibi proxy ile linkleri oluşturur
   const confirmMapping = () => {
     setProducts(rawRows.map((item, index) => {
       const ekstraObj = {};
@@ -515,6 +503,7 @@ export default function Editor() {
                         
                         {editingImageId === product.id ? (
                           <div className="flex flex-col gap-2 w-32">
+                            {/* PC'DEN STORAGE'A YÜKLEME (PC'den seçilirse yeni sistem) */}
                             <label className={`text-[10px] font-bold bg-blue-600 text-white px-2 py-1.5 rounded-md cursor-pointer text-center hover:bg-blue-700 transition ${isProcessing ? 'opacity-50' : ''}`}>
                               {isProcessing ? 'YÜKLENİYOR...' : 'PC\'DEN SEÇ'}
                               <input 
@@ -538,14 +527,12 @@ export default function Editor() {
                               />
                             </label>
 
-                            <input type="text" value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} placeholder="Veya Link..." className="text-[10px] px-2 py-1.5 border border-blue-200 rounded-md bg-blue-50 outline-none w-full font-medium"/>
+                            {/* MANUEL LİNK GİRİŞİ: Linki olduğu gibi veri tabanına yazar */}
+                            <input type="text" value={tempImageUrl} onChange={(e) => setTempImageUrl(e.target.value)} placeholder="Yeni Link..." className="text-[10px] px-2 py-1.5 border border-blue-200 rounded-md bg-blue-50 outline-none w-full font-medium"/>
                             <div className="flex gap-1 w-full">
-                              <button onClick={async () => {
+                              <button onClick={() => {
                                 if (tempImageUrl) {
-                                  setIsProcessing(true);
-                                  const finalUrl = await pullImageFromUrl(tempImageUrl);
-                                  setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: finalUrl} : p));
-                                  setIsProcessing(false);
+                                  setProducts(products.map(p => p.id === product.id ? {...p, resimUrl: tempImageUrl} : p));
                                 }
                                 setEditingImageId(null);
                               }} className="text-[10px] font-bold bg-green-500 text-white px-2 py-1 rounded-md flex-1 hover:bg-green-600">Tamam</button>
