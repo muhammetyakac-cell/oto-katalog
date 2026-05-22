@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
 import Login from './pages/Login';
 import { LayoutTemplate, Pause, Play, Radio, Volume2 } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 
 const STATIONS = [
   { name: 'Arabesk FM (Arabesk)', url: 'http://anadolu.liderhost.com.tr:6688/;' },
@@ -170,6 +171,7 @@ function App() {
         </main>
 
         <RadioPlayer />
+        <Analytics />
       </div>
     </Router>
   );
